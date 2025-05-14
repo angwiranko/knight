@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Huszárjáték</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #008066;
+      --primary-dark: #005a47;
+      --accent: #ff2e88;
+      --text-light: #ffffff;
+      --background-dark: #121212;
+      --surface-light: #2c2c2c;
+      --radius-sm: 8px;
+      --transition: all 0.3s ease;
+    }
+
+    body {
+      font-family: 'Rubik', sans-serif;
+      background-color: var(--background-dark);
+      color: var(--text-light);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .header {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 3rem;
+      color: var(--text-light);
+      text-shadow: 0 0 10px rgba(255, 46, 136, 0.5);
+    }
+
+    .buttons {
+      display: flex;
+      gap: 12px;
+      margin: 20px;
+    }
+
+    .button {
+      padding: 10px 16px;
+      background-color: var(--surface-light);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: var(--text-light);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .button:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+    }
+
+    #board {
+      display: grid;
+      gap: 4px;
+      margin-top: 20px;
+    }
+
+    .cell {
+      width: 60px;
+      height: 60px;
+      background-color: var(--surface-light);
+      border-radius: var(--radius-sm);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.2rem;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .cell.visited {
+      background-color: var(--primary);
+    }
+
+    .cell.current {
+      background-color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Huszárjáték</h1>
+  </div>
+
+  <div class="buttons">
+    <button class="button button-primary" onclick="startGame()">Új játék</button>
+    <select id="boardSize" class="button">
+      <option value="5">5×5</option>
+      <option value="6">6×6</option>
+      <option value="7">7×7</option>
+      <option value="8">8×8</option>
+      <option value="9">9×9</option>
+    </select>
+  </div>
+
+  <div id="board"></div>
+
+  <script>
+    let boardSize = 5;
+    let visited = [];
+    let currentPos = null;
+
+    function startGame() {
+      boardSize = parseInt(document.getElementById('boardSize').value);
+      const board = document.getElementById('board');
+      board.innerHTML = '';
+      board.style.gridTemplateColumns = `repeat(${boardSize}, 1fr)`;
+
+      visited = [];
+      currentPos = null;
+
+      for (let y = 0; y < boardSize; y++) {
+        for (let x = 0; x < boardSize; x++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.dataset.x = x;
+          cell.dataset.y = y;
+          cell.addEventListener('click', () => handleClick(x, y));
+          board.appendChild(cell);
+        }
+      }
+    }
+
+    function handleClick(x, y) {
+      if (!currentPos) {
+        currentPos = { x, y };
+        markVisited(x, y);
+        return;
+      }
+
+      const dx = Math.abs(currentPos.x - x);
+      const dy = Math.abs(currentPos.y - y);
+      if ((dx === 2 && dy === 1) || (dx === 1 && dy === 2)) {
+        if (visited.some(p => p.x === x && p.y === y)) {
+          alert("Már jártál itt! Újrakezdés.");
+          startGame();
+        } else {
+          currentPos = { x, y };
+          markVisited(x, y);
+          if (visited.length === boardSize * boardSize) {
+            alert("Gratulálok! Sikerült bejárni a táblát.");
+          }
+        }
+      }
+    }
+
+    function markVisited(x, y) {
+      visited.push({ x, y });
+      const index = y * boardSize + x;
+      const cells = document.querySelectorAll('.cell');
+      cells.forEach(c => c.classList.remove('current'));
+      const cell = cells[index];
+      cell.classList.add('visited', 'current');
+    }
+
+    window.onload = startGame;
+  </script>
+</body>
+</html>
