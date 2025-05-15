@@ -217,9 +217,11 @@
 
   <script>
     let boardSize = 5;
+    let lastWinGifIndex = -1;
+    let lastFailGifIndex = -1;
     let visited = [];
     let currentPos = null;
-	let gameOver = false;
+    let gameOver = false;
 
     const winGifs = [
       'https://media.giphy.com/media/4QFAH0qZ0LQnIwVYKT/giphy.gif',
@@ -232,7 +234,10 @@
       'https://media.giphy.com/media/MVUyVpyjakkRW/giphy.gif',
 	  'https://media.giphy.com/media/14aUO0Mf7dWDXW/giphy.gif',
       'https://media.giphy.com/media/GbIHIHhkgfpAs/giphy.gif',
-      'https://media.giphy.com/media/EimNpKJpihLY4/giphy.gif'
+      'https://media.giphy.com/media/EimNpKJpihLY4/giphy.gif',
+	  'https://media.giphy.com/media/xTiTnJOt1Sv4ut9sSQ/giphy.gif?',
+	  'https://media.giphy.com/media/cYejmY7tuJ4HTmBYHP/giphy.gif',
+	  'https://media.giphy.com/media/e8Z1NgnAO57Qk/giphy.gif'
     ];
 
     function startGame() {
@@ -280,7 +285,17 @@
     
       const img = document.createElement('img');
       const gifList = isWin ? winGifs : failGifs;
-      const randomIndex = Math.floor(Math.random() * gifList.length);
+      let lastIndex = isWin ? lastWinGifIndex : lastFailGifIndex;
+      let randomIndex;
+      do {
+        randomIndex = Math.floor(Math.random() * gifList.length);
+      } while (gifList.length > 1 && randomIndex === lastIndex);
+      
+      if (isWin) {
+        lastWinGifIndex = randomIndex;
+      } else {
+        lastFailGifIndex = randomIndex;
+      }
       img.src = gifList[randomIndex];
       img.alt = isWin ? 'Victory' : 'Try Again';
       imageDiv.appendChild(img);
