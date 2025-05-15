@@ -12,6 +12,7 @@
 
   <title>Knight Game</title>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   <style>
     :root {
       --primary: #008066;
@@ -253,6 +254,25 @@
       100% { transform: translate(-15%,-20%); opacity: 0.5; }
     }
 	
+	#easyModeButton {
+      width: 42px;
+      height: 42px;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+	
+	.material-symbols-outlined {
+      font-size: 24px;
+      vertical-align: middle;
+    }
+	
+	.material-symbols-outlined.active {
+      color: #ffeb3b;
+      text-shadow: 0 0 6px #ffeb3b88;
+    }
+	
   </style>
 </head>
 <body>
@@ -269,6 +289,7 @@
       <option value="9">9×9</option>
     </select> 
     <button class="button button-primary" onclick="newGame()">New Game</button>
+	<button id="easyModeButton" class="button" onclick="toggleEasyMode()" title="Easy Mode"><span class="material-symbols-outlined">lightbulb</span></button>
   </div>
 
   <div id="boardWrapper" style="position: relative; display: inline-block; z-index: 30;">
@@ -284,6 +305,11 @@
       </div>
     </div>
   </div>
+   
+  <div id="stepControls" style="display: none; margin-bottom: 1rem; padding: 1.5rem; gap: 8px;">
+    <button class="button" onclick="stepBack()">&larr; undo</button>
+    <button class="button" onclick="stepForward()">redo &rarr;</button>
+  </div>
 
   <script>
     let boardSize = 5;
@@ -292,6 +318,9 @@
     let visited = [];
     let currentPos = null;
     let gameOver = false;
+    let easyMode = false;
+    let moveHistory = [];
+    let currentStep = -1;
 
     const winGifs = [
       'https://media.giphy.com/media/4QFAH0qZ0LQnIwVYKT/giphy.gif',
@@ -318,7 +347,8 @@
       board.style.gridTemplateColumns = `repeat(${boardSize}, 1fr)`;
       board.style.gridTemplateRows = `repeat(${boardSize}, 1fr)`;
       board.style.pointerEvents = 'auto';
-
+      moveHistory = [];
+      currentStep = -1;
       visited = [];
       currentPos = null;
 
@@ -482,6 +512,107 @@
       
       svg.appendChild(text);
       cell.appendChild(svg);
+    }
+	
+	
+    function toggleEasyMode() {
+      easyMode = !easyMode;
+    
+      const btn = document.getElementById('easyModeButton');
+      btn.classList.toggle('button-primary', easyMode);
+    
+      document.getElementById('stepControls').style.display = easyMode ? 'flex' : 'none';
+    
+      if (easyMode) {
+        renderStepNumbers();
+      } else {
+        clearStepNumbers();
+      }
+    }
+  
+    function renderStepNumbers() {
+      const cells = document.querySelectorAll('.cell');
+      cells.forEach((cell, idx) => {
+        cell.innerHTML += `<div class="step-label" style="position:absolute; bottom:4px; right:4px; font-size:0.75rem; opacity:0.7;"></div>`;
+      });
+      updateStepLabels();
+    }
+  
+    function updateStepLabels() {
+      const cells = document.querySelectorAll('.cell .step-label');
+      cells.forEach(label => label.innerText = '');
+      visited.forEach((step, idx) => {
+        const index = step.y * boardSize + step.x;
+        const label = cells[index];
+        if (label) label.innerText = idx + 1;
+      });
+    }
+  
+    function clearStepNumbers() {
+      document.querySelectorAll('.step-label').forEach(el => el.remove());
+    }
+  
+    function stepBack() {
+      if (currentStep > 0) {
+        currentStep--;
+        currentPos = moveHistory[currentStep];
+        visited = moveHistory.slice(0, currentStep + 1);
+        updateBoard();
+      }
+    }
+  
+    function stepForward() {
+      if (currentStep < moveHistory.length - 1) {
+        currentStep++;
+        currentPos = moveHistory[currentStep];
+        visited = moveHistory.slice(0, currentStep + 1);
+        updateBoard();
+      }
+    }
+  
+    function updateBoard() {
+      const cells = document.querySelectorAll('.cell');
+      cells.forEach(cell => {
+        cell.classList.remove('visited', 'current');
+        cell.innerHTML = '';
+      });
+      visited.forEach((step, idx) => {
+        const index = step.y * boardSize + step.x;
+        const cell = cells[index];
+        cell.classList.add('visited');
+        if (idx === visited.length - 1) {
+          cell.classList.add('current');
+          const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          svg.setAttribute("viewBox", "0 0 45 45");
+          svg.classList.add("knight-icon");
+          const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          text.setAttribute("x", "50%");
+          text.setAttribute("y", "50%");
+          text.setAttribute("dy", "0.15em");
+		  text.setAttribute("dominant-baseline", "middle");
+          text.setAttribute("text-anchor", "middle");
+          text.setAttribute("font-size", "40");
+          text.setAttribute("font-family", "serif");
+          text.setAttribute("fill", "#ffffff");
+          text.textContent = "♘";
+          svg.appendChild(text);
+          cell.appendChild(svg);
+        }
+      });
+      
+        if (easyMode) {
+        clearStepNumbers();
+        renderStepNumbers();
+      }
+    }
+  
+    const originalMarkVisited = markVisited;
+    markVisited = function(x, y) {
+      moveHistory = visited.slice();
+      moveHistory.push({ x, y });
+      currentStep = moveHistory.length - 1;
+      originalMarkVisited(x, y);
+      if (easyMode) updateStepLabels();
     }
 
     window.onload = newGame;
