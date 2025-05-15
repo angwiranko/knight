@@ -20,6 +20,7 @@
       --text-light: #ffffff;
       --background-dark: #121212;
       --surface-light: #2c2c2c;
+	  --cell-light: #d4b7c52e;
       --radius-sm: 8px;
       --transition: all 0.3s ease;
     }
@@ -38,6 +39,7 @@
     .header {
       margin-top: 30px;
       text-align: center;
+	  z-index: 10;
     }
 
     h1 {
@@ -50,6 +52,7 @@
       display: flex;
       gap: 12px;
       margin: 20px;
+	  z-index: 15;
     }
 
     .button {
@@ -105,7 +108,7 @@
     }
 
     .cell {
-      background-color: var(--surface-light);
+      background-color: var(--cell-light);
       border-radius: var(--radius-sm);
       display: flex;
       justify-content: center;
@@ -212,6 +215,44 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
     
+    body::before {
+      content: '';
+      position: fixed;
+      bottom: -40vw;
+      left: -40vw;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at bottom left, #ff2e8899, #ff806699, transparent);
+      animation: aurora-left 8s ease-in-out infinite alternate;
+      z-index: 0;
+      pointer-events: none;
+      filter: blur(100px);
+    }
+    
+    body::after {
+      content: '';
+      position: fixed;
+      top: -40vw;
+      right: -40vw;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at top right, #ff806699, #ff2e8899, transparent);
+      animation: aurora-right 8s ease-in-out infinite alternate;
+      z-index: 0;
+      pointer-events: none;
+      filter: blur(100px);
+    }
+    
+    @keyframes aurora-left {
+      0% { transform: translate(0,0); opacity: 0.3; }
+      100% { transform: translate(-20%,-20%); opacity: 0.5; }
+    }
+    
+    @keyframes aurora-right {
+      0% { transform: translate(10%, 10%); opacity: 0.3; }
+      100% { transform: translate(-15%,-20%); opacity: 0.5; }
+    }
+	
   </style>
 </head>
 <body>
@@ -230,7 +271,7 @@
     <button class="button button-primary" onclick="newGame()">New Game</button>
   </div>
 
-  <div id="boardWrapper" style="position: relative; display: inline-block;">
+  <div id="boardWrapper" style="position: relative; display: inline-block; z-index: 30;">
     
     <div id="board"></div>
     
