@@ -34,7 +34,7 @@
     }
 
     h1 {
-      font-size: 3rem;
+      font-size: 2.8rem;
       color: var(--text-light);
       text-shadow: 0 0 10px rgba(255, 46, 136, 0.5);
     }
@@ -93,6 +93,12 @@
 
     .cell.current {
       background-color: var(--accent);
+    }
+
+    .cell .knight-icon {
+      font-size: 1.8rem;
+      line-height: 1;
+      pointer-events: none;
     }
     
     .modal {
@@ -172,7 +178,7 @@
 </head>
 <body>
   <div class="header">
-    <h1>Knight Game</h1>
+    <h1>Knight♘Game</h1>
   </div>
 
   <div class="buttons">
@@ -329,11 +335,22 @@
 
     function markVisited(x, y) {
       visited.push({ x, y });
-      const index = y * boardSize + x;
+    
       const cells = document.querySelectorAll('.cell');
-      cells.forEach(c => c.classList.remove('current'));
+      cells.forEach(c => {
+        c.classList.remove('current');
+        const icon = c.querySelector('.knight-icon');
+        if (icon) icon.remove(); // előző ikon törlése
+      });
+    
+      const index = y * boardSize + x;
       const cell = cells[index];
       cell.classList.add('visited', 'current');
+    
+      const icon = document.createElement('span');
+      icon.className = 'knight-icon';
+      icon.innerHTML = '♘';
+      cell.appendChild(icon);
     }
 
     window.onload = startGame;
