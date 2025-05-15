@@ -219,6 +219,7 @@
     let boardSize = 5;
     let visited = [];
     let currentPos = null;
+	let gameOver = false;
 
     const winGifs = [
       'https://media.giphy.com/media/4QFAH0qZ0LQnIwVYKT/giphy.gif',
@@ -235,6 +236,7 @@
     ];
 
     function startGame() {
+	  gameOver = false;
 	  boardSize = parseInt(document.getElementById('boardSize').value);
       const board = document.getElementById('board');
       board.innerHTML = '';
@@ -256,9 +258,9 @@
         }
       }
       dataLayer.push({
-        event: 'level_complete',
-        level: boardSize,
-        result: 'startgame'
+        event: 'game_result',
+        result: 'startgame',
+        level: boardSize
       });
     }
 
@@ -334,26 +336,27 @@
       const dx = Math.abs(currentPos.x - x);
       const dy = Math.abs(currentPos.y - y);
         if ((dx === 2 && dy === 1) || (dx === 1 && dy === 2)) {
-            if (visited.some(p => p.x === x && p.y === y)) {
+            if (!gameOver && visited.some(p => p.x === x && p.y === y)) {
+              gameOver = true;
               dataLayer.push({
-                event: 'level_complete',
-                level: boardSize,
-                result: 'gameover'
+                event: 'game_result',
+                result: 'lose',
+                level: boardSize
               });
               showModal("Oh no!","You've already been here! Fill the board without stepping on the same square twice.");
               startGame();
             } else {
               currentPos = { x, y };
               markVisited(x, y);
-              if (visited.length === boardSize * boardSize) {
-                dataLayer.push({
-                  event: 'level_complete',
-                  level: boardSize,
-                  result: 'win'
-                });
-				showModal("You win!","Congratulations! You've successfully completed the board.", true);
-
-              }
+              if (!gameOver && visited.length === boardSize * boardSize) {
+                  gameOver = true;
+                  dataLayer.push({
+                    event: 'game_result',
+                    result: 'win',
+                    level: boardSize
+                  });
+                  showModal("You win!", "Congratulations! You've successfully completed the board.", true);
+                }
             }
         }
     }
