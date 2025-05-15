@@ -257,16 +257,15 @@
           cell.addEventListener('click', () => handleClick(x, y));
         }
       }
-      dataLayer.push({
-        event: 'game_result',
-        result: 'startgame',
-        level: boardSize
-      });
     }
 
     function newGame() {
       document.getElementById('modalOverlay').classList.remove('show');
       document.getElementById('board').style.pointerEvents = 'auto';
+      dataLayer.push({
+        event: 'game_start',
+        level: boardSize
+      });
           setTimeout(() => {
         startGame();
       }, 50);
@@ -322,7 +321,7 @@
     function closeModal() {
       document.getElementById('modalOverlay').classList.remove('show');
       setTimeout(() => {
-        startGame();
+        newGame();
       }, 300);
     }
 
@@ -355,7 +354,7 @@
                     result: 'win',
                     level: boardSize
                   });
-                  showModal("You win!", "Congratulations! You've successfully completed the board.", true);
+                  showModal("You won!", "Congratulations! You've successfully completed the board.", true);
                 }
             }
         }
@@ -368,7 +367,7 @@
       cells.forEach(c => {
         c.classList.remove('current');
         const icon = c.querySelector('.knight-icon');
-        if (icon) icon.remove(); // előző ikon törlése
+        if (icon) icon.remove();
       });
     
       const index = y * boardSize + x;
@@ -394,7 +393,7 @@
       cell.appendChild(svg);
     }
 
-    window.onload = startGame;
+    window.onload = newGame;
   </script>
 </body>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-THJJ7WTD"
