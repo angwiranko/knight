@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Huszárjáték</title>
+  <title>Knight Game</title>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -69,11 +69,13 @@
       display: grid;
       gap: 4px;
       margin-top: 20px;
+      width: 90vmin;
+      height: 90vmin;
+      max-width: 540px;
+      max-height: 540px;
     }
 
     .cell {
-      width: 60px;
-      height: 60px;
       background-color: var(--surface-light);
       border-radius: var(--radius-sm);
       display: flex;
@@ -92,25 +94,95 @@
     .cell.current {
       background-color: var(--accent);
     }
+    
+    .modal {
+      width: 70%;
+      max-width: 540px;
+      background: var(--surface-light);
+      border: 2px solid var(--accent);
+      border-radius: var(--radius-sm);
+      padding: 20px 30px;
+      color: var(--text-light);
+      text-align: center;
+      z-index: 999;
+      box-shadow: 0 0 20px rgba(255, 46, 136, 0.5);
+    }
+    
+    .modal h2 {
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+
+    .modal p {
+      font-size: 1rem;
+    }
+    
+    .modal button {
+      margin: 10px 6px 0;
+      padding: 10px 16px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    .modal button:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .modal-overlay {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      top: 20px; left: 0;
+      width: 90vmin;
+      height: 90vmin;
+      max-width: 540px;
+      max-height: 540px;
+      background-color: rgba(0,0,0,0.6);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 1000;
+    }
+    
+    .modal-overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+    
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>Huszárjáték</h1>
+    <h1>Knight Game</h1>
   </div>
 
   <div class="buttons">
-    <button class="button button-primary" onclick="startGame()">Új játék</button>
     <select id="boardSize" class="button">
       <option value="5">5×5</option>
       <option value="6">6×6</option>
       <option value="7">7×7</option>
       <option value="8">8×8</option>
       <option value="9">9×9</option>
-    </select>
+    </select> 
+    <button class="button button-primary" onclick="startGame()">New Game</button>
   </div>
 
-  <div id="board"></div>
+  <div id="boardWrapper" style="position: relative; display: inline-block;">
+    
+    <div id="board"></div>
+    
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <h2 id="modalTitle">Üzenet</h2>
+        <p id="modalText"></p>
+        <div id="modalButtons"></div>
+      </div>
+    </div>
+  </div>
 
   <script>
     let boardSize = 5;
@@ -122,6 +194,8 @@
       const board = document.getElementById('board');
       board.innerHTML = '';
       board.style.gridTemplateColumns = `repeat(${boardSize}, 1fr)`;
+      board.style.gridTemplateRows = `repeat(${boardSize}, 1fr)`;
+      board.style.pointerEvents = 'auto';
 
       visited = [];
       currentPos = null;
@@ -132,10 +206,55 @@
           cell.className = 'cell';
           cell.dataset.x = x;
           cell.dataset.y = y;
-          cell.addEventListener('click', () => handleClick(x, y));
           board.appendChild(cell);
+          cell.addEventListener('click', () => handleClick(x, y));
         }
       }
+        //document.getElementById('modalOverlay').classList.remove('show');
+    }
+
+    function showModal(title, message, isWin = false) {
+      document.getElementById('modalTitle').innerText = title;
+      document.getElementById('modalText').innerText = message;
+    
+      const buttonsDiv = document.getElementById('modalButtons');
+      buttonsDiv.innerHTML = '';
+    
+      if (isWin) {
+        const againBtn = document.createElement('button');
+        againBtn.innerText = 'Again';
+        againBtn.className = 'button';
+        againBtn.onclick = closeModal;
+        buttonsDiv.appendChild(againBtn);
+
+        if (boardSize < 9) {
+          const nextBtn = document.createElement('button');
+          nextBtn.innerText = 'Next Level';
+          nextBtn.className = 'button button-primary';
+          nextBtn.onclick = () => {
+            boardSize++;
+            document.getElementById('boardSize').value = boardSize;
+            closeModal();
+          };
+          buttonsDiv.appendChild(nextBtn);
+        }
+      } else {
+        const restartBtn = document.createElement('button');
+        restartBtn.innerText = 'Restart';
+        restartBtn.className = 'button button-primary';
+        restartBtn.onclick = closeModal;
+        buttonsDiv.appendChild(restartBtn);
+      }
+
+      document.getElementById('modalOverlay').classList.add('show');
+      document.getElementById('board').style.pointerEvents = 'none';
+    }
+    
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('show');
+      setTimeout(() => {
+        startGame();
+      }, 300);
     }
 
     function handleClick(x, y) {
@@ -147,18 +266,18 @@
 
       const dx = Math.abs(currentPos.x - x);
       const dy = Math.abs(currentPos.y - y);
-      if ((dx === 2 && dy === 1) || (dx === 1 && dy === 2)) {
-        if (visited.some(p => p.x === x && p.y === y)) {
-          alert("Már jártál itt! Újrakezdés.");
-          startGame();
-        } else {
-          currentPos = { x, y };
-          markVisited(x, y);
-          if (visited.length === boardSize * boardSize) {
-            alert("Gratulálok! Sikerült bejárni a táblát.");
-          }
+        if ((dx === 2 && dy === 1) || (dx === 1 && dy === 2)) {
+            if (visited.some(p => p.x === x && p.y === y)) {
+              showModal("Oh no!","You've already been here! Fill the board without stepping on the same square twice.");
+              startGame();
+            } else {
+              currentPos = { x, y };
+              markVisited(x, y);
+              if (visited.length === boardSize * boardSize) {
+                showModal("You win!","Congratulations! You've successfully completed the board.", true);
+              }
+            }
         }
-      }
     }
 
     function markVisited(x, y) {
