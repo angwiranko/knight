@@ -101,7 +101,7 @@
       background: var(--surface-light);
       border: 2px solid var(--accent);
       border-radius: var(--radius-sm);
-      padding: 20px 30px;
+      padding: 24px;
       color: var(--text-light);
       text-align: center;
       z-index: 999;
@@ -152,6 +152,21 @@
       opacity: 1;
       pointer-events: all;
     }
+
+    #modalImageContainer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    #modalImageContainer img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      border-radius: var(--radius-sm); /* ugyanaz, mint a gomboknál */
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
     
   </style>
 </head>
@@ -168,7 +183,7 @@
       <option value="8">8×8</option>
       <option value="9">9×9</option>
     </select> 
-    <button class="button button-primary" onclick="startGame()">New Game</button>
+    <button class="button button-primary" onclick="newGame()">New Game</button>
   </div>
 
   <div id="boardWrapper" style="position: relative; display: inline-block;">
@@ -177,6 +192,7 @@
     
     <div class="modal-overlay" id="modalOverlay">
       <div class="modal">
+        <div id="modalImageContainer"></div>
         <h2 id="modalTitle">Üzenet</h2>
         <p id="modalText"></p>
         <div id="modalButtons"></div>
@@ -189,8 +205,22 @@
     let visited = [];
     let currentPos = null;
 
+    const winGifs = [
+      'https://media.giphy.com/media/4QFAH0qZ0LQnIwVYKT/giphy.gif',
+      'https://media.giphy.com/media/Uk5PGCpvkSi0oExEMW/giphy.gif',
+      'https://media.giphy.com/media/S51mbDRgAI7CwfqcBN/giphy.gif',
+      'https://media.giphy.com/media/eoxomXXVL2S0E/giphy.gif'
+    ];
+    
+    const failGifs = [
+      'https://media.giphy.com/media/MVUyVpyjakkRW/giphy.gif',
+	  'https://media.giphy.com/media/14aUO0Mf7dWDXW/giphy.gif',
+      'https://media.giphy.com/media/GbIHIHhkgfpAs/giphy.gif',
+      'https://media.giphy.com/media/EimNpKJpihLY4/giphy.gif'
+    ];
+
     function startGame() {
-      boardSize = parseInt(document.getElementById('boardSize').value);
+	  boardSize = parseInt(document.getElementById('boardSize').value);
       const board = document.getElementById('board');
       board.innerHTML = '';
       board.style.gridTemplateColumns = `repeat(${boardSize}, 1fr)`;
@@ -210,12 +240,29 @@
           cell.addEventListener('click', () => handleClick(x, y));
         }
       }
-        //document.getElementById('modalOverlay').classList.remove('show');
+    }
+
+    function newGame() {
+      document.getElementById('modalOverlay').classList.remove('show');
+      document.getElementById('board').style.pointerEvents = 'auto';
+          setTimeout(() => {
+        startGame();
+      }, 50);
     }
 
     function showModal(title, message, isWin = false) {
       document.getElementById('modalTitle').innerText = title;
       document.getElementById('modalText').innerText = message;
+  
+      const imageDiv = document.getElementById('modalImageContainer');
+      imageDiv.innerHTML = '';
+    
+      const img = document.createElement('img');
+      const gifList = isWin ? winGifs : failGifs;
+      const randomIndex = Math.floor(Math.random() * gifList.length);
+      img.src = gifList[randomIndex];
+      img.alt = isWin ? 'Victory' : 'Try Again';
+      imageDiv.appendChild(img);
     
       const buttonsDiv = document.getElementById('modalButtons');
       buttonsDiv.innerHTML = '';
