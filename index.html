@@ -330,13 +330,23 @@
       const dy = Math.abs(currentPos.y - y);
         if ((dx === 2 && dy === 1) || (dx === 1 && dy === 2)) {
             if (visited.some(p => p.x === x && p.y === y)) {
+              dataLayer.push({
+                event: 'level_complete',
+                level: boardSize,
+                result: 'gameover'
+              });
               showModal("Oh no!","You've already been here! Fill the board without stepping on the same square twice.");
               startGame();
             } else {
               currentPos = { x, y };
               markVisited(x, y);
               if (visited.length === boardSize * boardSize) {
-                showModal("You win!","Congratulations! You've successfully completed the board.", true);
+                dataLayer.push({
+                  event: 'level_complete',
+                  level: boardSize,
+                  result: 'win'
+                  showModal("You win!","Congratulations! You've successfully completed the board.", true);
+                });
               }
             }
         }
