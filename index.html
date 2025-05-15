@@ -95,10 +95,12 @@
       background-color: var(--accent);
     }
 
-    .cell .knight-icon {
-      font-size: 1.8rem;
-      line-height: 1;
+    .knight-icon {
+      width: 80%;
+      height: 80%;
+      aspect-ratio: 1 / 1;
       pointer-events: none;
+	  color: white;
     }
     
     .modal {
@@ -347,10 +349,23 @@
       const cell = cells[index];
       cell.classList.add('visited', 'current');
     
-      const icon = document.createElement('span');
-      icon.className = 'knight-icon';
-      icon.innerHTML = '♘';
-      cell.appendChild(icon);
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("viewBox", "0 0 45 45");
+      svg.classList.add("knight-icon");
+      
+      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      text.setAttribute("x", "50%");
+      text.setAttribute("y", "50%");
+      text.setAttribute("dy", "0.15em");
+      text.setAttribute("dominant-baseline", "middle");
+      text.setAttribute("text-anchor", "middle");
+      text.setAttribute("font-size", "40");
+      text.setAttribute("font-family", "serif");
+      text.setAttribute("fill", "#ffffff"); 
+      text.textContent = "♘";
+      
+      svg.appendChild(text);
+      cell.appendChild(svg);
     }
 
     window.onload = startGame;
