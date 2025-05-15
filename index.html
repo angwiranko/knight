@@ -255,6 +255,11 @@
           cell.addEventListener('click', () => handleClick(x, y));
         }
       }
+      dataLayer.push({
+        event: 'level_complete',
+        level: boardSize,
+        result: 'startgame'
+      });
     }
 
     function newGame() {
